@@ -3,7 +3,7 @@ PowerShell script to get all Azure role assignments for all Azure resources
 
 ## Description
 
-This script uses the **Az** PowerShell module to get all the Azure role assignments for all Azure resources across all your subscriptions.
+This script uses the **Az** PowerShell module to get all the Azure role assignments for all Azure resources across all available subscriptions.
 
 Results are exported as a CSV file to the location determined in the script parameters.
 
