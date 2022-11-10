@@ -29,7 +29,7 @@ $output = foreach ($sub in $azSubscriptions) {
         $scope_Split = $role.Scope.Split("/")
 
         # If the role assignmnet is for a management group
-        if ($scope_Split[2] -eq "managementGroups") {
+        if ($scope_Split[3] -eq "managementGroups") {
             $managementGroup = $scope_Split[4]
         }
 
