@@ -52,7 +52,7 @@ function Get-ScopeIdentifiers {
 # Connect to Azure PowerShell
 Connect-AzAccount
 
-# Add all subscriptions into current context
+# Add all available subscriptions into the current context
 Get-AzSubscription | Set-AzContext
 
 # Get the subscription names and IDs now in the current context
@@ -71,7 +71,7 @@ $output = foreach ($sub in $azSubscriptions) {
             ManagementGroup      = $managementGroup
             Subscription         = $sub.Name
             SubscriptionId       = $sub.Id
-           # RoleAssignmnetId    = $role.RoleAssignmentId
+           # RoleAssignmentId    = $role.RoleAssignmentId
            # Scope               = $role.Scope
             ResourceGroup        = $resourceGroup
             ProviderName         = $providerName
