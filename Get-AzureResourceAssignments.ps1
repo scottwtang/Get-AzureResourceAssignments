@@ -9,6 +9,46 @@ param (
     $FileName = "$(Get-Date -f 'yyyy-MM-dd')-AzureResourceAssignments.csv"
 ) 
 
+function Get-ScopeIdentifiers {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $Scope
+    )
+
+    <#
+        .SYNOPSIS
+        Formats the scope string into the proper identifiers
+    #>
+
+    $Scope_Split = $Scope.Split("/")
+
+    # If the role assignmnet is for a management group
+    if ($scope_Split[3] -eq "managementGroups") {
+        $managementGroup = $scope_Split[4]
+    }
+
+    # If the role assignment is for a resource group
+    elseif ($scope_Split[3] -eq "resourceGroups") {
+        $resourceGroup = $scope_Split[4]
+
+        # If the role assignment is for a resource
+        if ($scope_Split[5] -eq "providers") {        
+            $providerName = $scope_Split[6]
+            $resourceType = $scope_Split[7]
+            $resourceName = $scope_Split[-1]
+                
+            # If the role assignmnet resource type has a subtype(s)
+            if ($scope_Split.Count -ge 10) {
+                $resourceSubType = ($scope_Split[ 8..($scope_Split.Count - 2) ] ) -Join ("/")
+            }
+        }
+    }
+
+    return $managementGroup, $resourceGroup, $providerName, $resourceType, $resourceSubType, $resourceName
+}
+
 # Connect to Azure PowerShell
 Connect-AzAccount
 
@@ -25,30 +65,7 @@ $output = foreach ($sub in $azSubscriptions) {
 
     foreach ($role in $azRoles) {
 
-        # Split the scope into hierarchies
-        $scope_Split = $role.Scope.Split("/")
-
-        # If the role assignmnet is for a management group
-        if ($scope_Split[3] -eq "managementGroups") {
-            $managementGroup = $scope_Split[4]
-        }
-
-        # If the role assignment is for a resource group
-        elseif ($scope_Split[3] -eq "resourceGroups") {
-            $resourceGroup = $scope_Split[4]
-
-            # If the role assignment is for a resource
-            if ($scope_Split[5] -eq "providers") {        
-                $providerName = $scope_Split[6]
-                $resourceType = $scope_Split[7]
-                $resourceName = $scope_Split[-1]
-                
-                # If the role assignmnet resource type has a subtype(s)
-                if ($scope_Split.Count -ge 10) {
-                    $resourceSubType = ($scope_Split[ 8..($scope_Split.Count - 2) ] ) -Join ("/")
-                }
-            }
-        }
+        $managementGroup, $resourceGroup, $providerName, $resourceType, $resourceSubType, $resourceName = Get-ScopeIdentifiers -Scope $role.Scope
 
         [PSCustomObject] @{
             ManagementGroup      = $managementGroup
@@ -69,13 +86,6 @@ $output = foreach ($sub in $azSubscriptions) {
             RoleDefinitionId     = $role.RoleDefinitionId
             Description          = $role.Description
         }
-
-        $managementGroup  = $null
-        $resourceGroup    = $null
-        $resourceName     = $null
-        $providerName     = $null
-        $resourceType     = $null
-        $resourceSubType  = $null
     }
 }
 
