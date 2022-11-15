@@ -21,8 +21,10 @@ function Get-ScopeIdentifiers {
         .SYNOPSIS
         Formats the scope string into the proper identifiers
     #>
+    	
+    $managementGroup, $resourceGroup, $providerName, $resourceType, $resourceSubType, $resourceName = $null
 
-    $Scope_Split = $Scope.Split("/")
+    $scope_Split = $Scope.Split("/")
 
     # If the role assignmnet is for a management group
     if ($scope_Split[3] -eq "managementGroups") {
@@ -94,7 +96,7 @@ $filePath = Join-Path $FolderPath -ChildPath $FileName
 
 try
 {
-    $output | Sort-Object ManagementGroup | Export-CSV -NoTypeInformation -Path $filePath
+    $output | Sort-Object -Property @{ Expression = {$_.ManagementGroup}; Descending = $true }, Subscription, ResourceGroup, ProviderName, ResourceType, ResourceName, PrincipalName | Export-CSV -NoTypeInformation -Path $filePath
     Write-Host "Export to $filePath succeeded" -ForegroundColor Cyan
 }
 catch
