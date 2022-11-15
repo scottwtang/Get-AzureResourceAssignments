@@ -1,3 +1,31 @@
+<#
+    .SYNOPSIS
+        This script gets information on all the Azure resource role assignments.
+
+    .DESCRIPTION        
+        This script uses the Az PowerShell module to get all the Azure role assignments for all Azure resources across all available subscriptions.
+        Results are exported as a CSV file to the location determined in the script parameters.
+
+    .PARAMETER FolderPath
+        Folder path to export the results to.
+
+    .PARAMETER FileName
+        File name to to export the results as.
+
+    .EXAMPLE
+        # Run script and save results to the default folder with the default filename
+        .\Get-AzureResourceAssignments.ps1
+        
+        # Run script and save results to the folder C:\AzureADAppsCredentials with the default filename
+        .\Get-AzureResourceAssignments.ps1 -FolderPath C:\AzureResourceAssignments
+        
+        # Run script and save results to the default folder with the filename ScriptResults.csv
+        .\Get-AzureResourceAssignments.ps1 -FileName ScriptResults.csv
+        
+        # Run script and save results to the folder C:\AzureADAppsCredentials with the filename ScriptResults.csv
+        .\Get-AzureResourceAssignments.ps1 -FolderPath C:\AzureResourceAssignments -FileName ScriptResults.csv
+#>
+
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $false)]
@@ -67,6 +95,7 @@ $output = foreach ($sub in $azSubscriptions) {
 
     foreach ($role in $azRoles) {
 
+        # Format the scope string into the proper identifiers
         $managementGroup, $resourceGroup, $providerName, $resourceType, $resourceSubType, $resourceName = Get-ScopeIdentifiers -Scope $role.Scope
 
         [PSCustomObject] @{
